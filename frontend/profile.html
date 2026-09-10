@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Profile</title>
+</head>
+
+<body>
+
+    <h1>My Profile</h1>
+
+    <p>
+        <strong>Name:</strong>
+        <span id="name">Loading...</span>
+    </p>
+
+    <p>
+        <strong>Email:</strong>
+        <span id="email">Loading...</span>
+    </p>
+
+    <p id="message"></p>
+
+    <br>
+
+    <button onclick="goDashboard()">
+        Back to Dashboard
+    </button>
+
+    <button onclick="logout()">
+        Logout
+    </button>
+
+
+<script>
+
+// ===============================
+// CHECK TOKEN
+// ===============================
+
+const token = localStorage.getItem("token");
+
+if (!token) {
+
+    alert("Please login first.");
+
+    window.location.href = "login.html";
+
+}
+
+
+// ===============================
+// LOAD PROFILE
+// ===============================
+
+async function loadProfile() {
+
+    try {
+
+        const response = await fetch(
+            "/api/users/profile",
+            {
+                method: "GET",
+
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            }
+        );
+
+
+        const data = await response.json();
+
+
+        console.log("Profile response:", data);
+
+
+        if (response.status === 401) {
+
+            alert("Your login session has expired.");
+
+            logout();
+
+            return;
+
+        }
+
+
+        if (!response.ok) {
+
+            document.getElementById("message")
+                .innerText =
+                data.message || "Failed to load profile.";
+
+            return;
+
+        }
+
+
+        // Show profile
+        document.getElementById("name")
+            .innerText = data.name || "No name";
+
+        document.getElementById("email")
+            .innerText = data.email || "No email";
+
+
+        document.getElementById("message")
+            .innerText = "Profile loaded successfully.";
+
+
+    } catch (error) {
+
+        console.error("Profile error:", error);
+
+        document.getElementById("message")
+            .innerText =
+            "Cannot connect to server.";
+
+    }
+
+}
+
+
+// ===============================
+// DASHBOARD
+// ===============================
+
+function goDashboard() {
+
+    window.location.href =
+        "dashboard.html";
+
+}
+
+
+// ===============================
+// LOGOUT
+// ===============================
+
+function logout() {
+
+    localStorage.removeItem("token");
+
+    localStorage.removeItem("user");
+
+    window.location.href =
+        "login.html";
+
+}
+
+
+// ===============================
+// START
+// ===============================
+
+loadProfile();
+
+</script>
+
+</body>
+
+</html>

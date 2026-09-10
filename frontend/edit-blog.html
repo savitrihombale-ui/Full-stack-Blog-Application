@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Blog</title>
+
+</head>
+
+<body>
+
+    <h1>Edit Blog</h1>
+
+    <form id="editForm">
+
+        <label>Blog Title:</label>
+        <br>
+
+        <input
+            type="text"
+            id="title"
+            required
+        >
+
+        <br><br>
+
+        <label>Blog Content:</label>
+        <br>
+
+        <textarea
+            id="content"
+            rows="10"
+            cols="50"
+            required
+        ></textarea>
+
+        <br><br>
+
+        <label>Category:</label>
+        <br>
+
+        <select id="category">
+
+            <option value="Technology">
+                Technology
+            </option>
+
+            <option value="Education">
+                Education
+            </option>
+
+            <option value="Programming">
+                Programming
+            </option>
+
+            <option value="AI">
+                AI
+            </option>
+
+            <option value="Cybersecurity">
+                Cybersecurity
+            </option>
+
+            <option value="General">
+                General
+            </option>
+
+        </select>
+
+        <br><br>
+
+        <button type="submit">
+            Update Blog
+        </button>
+
+    </form>
+
+    <p id="message"></p>
+
+    <br>
+
+    <a href="dashboard.html">
+        Back to Dashboard
+    </a>
+
+
+<script>
+
+const params =
+    new URLSearchParams(window.location.search);
+
+const blogId =
+    params.get("id");
+
+
+if (!blogId) {
+
+    alert("Blog ID not found");
+
+    window.location.href =
+        "dashboard.html";
+
+}
+
+
+// GET BLOG
+
+async function loadBlog() {
+
+    try {
+
+        const response =
+            await fetch("/api/blogs/" + blogId);
+
+        const blog =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            alert(blog.message);
+
+            return;
+
+        }
+
+
+        document.getElementById("title").value =
+            blog.title;
+
+        document.getElementById("content").value =
+            blog.content;
+
+        document.getElementById("category").value =
+            blog.category || "General";
+
+    } catch (error) {
+
+        console.error(error);
+
+        document.getElementById("message").innerText =
+            "Cannot connect to server.";
+
+    }
+
+}
+
+
+// UPDATE BLOG
+
+document
+.getElementById("editForm")
+.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+
+    const title =
+        document.getElementById("title").value.trim();
+
+    const content =
+        document.getElementById("content").value.trim();
+
+    const category =
+        document.getElementById("category").value;
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/blogs/" + blogId,
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        title: title,
+
+                        content: content,
+
+                        category: category
+
+                    })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        document.getElementById("message").innerText =
+            data.message;
+
+
+        if (response.ok) {
+
+            setTimeout(function() {
+
+                window.location.href =
+                    "dashboard.html";
+
+            }, 1000);
+
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        document.getElementById("message").innerText =
+            "Cannot connect to server.";
+
+    }
+
+});
+
+
+loadBlog();
+
+</script>
+
+</body>
+
+</html>
